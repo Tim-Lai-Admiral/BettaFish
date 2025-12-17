@@ -238,6 +238,7 @@ browser_data/
 /data/
 crawled_data/
 output/
+db_data/
 
 # Node.js
 node_modules/

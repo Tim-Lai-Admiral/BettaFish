@@ -98,7 +98,14 @@ class WeiboDbStoreImplement(AbstractStore):
         Returns:
 
         """
-        note_id = content_item.get("note_id")
+        # Cast note_id to int to match DB schema (BIGINT)
+        note_id_raw = content_item.get("note_id")
+        try:
+            note_id = int(note_id_raw)
+            content_item["note_id"] = note_id
+        except Exception:
+            utils.logger.error(f"[WeiboDbStoreImplement.store_content] invalid note_id: {note_id_raw}")
+            return
         async with get_session() as session:
             stmt = select(WeiboNote).where(WeiboNote.note_id == note_id)
             res = await session.execute(stmt)
@@ -124,7 +131,21 @@ class WeiboDbStoreImplement(AbstractStore):
         Returns:
 
         """
-        comment_id = comment_item.get("comment_id")
+        # Cast IDs to int to match DB schema (BIGINT)
+        comment_id_raw = comment_item.get("comment_id")
+        note_id_raw = comment_item.get("note_id")
+        try:
+            comment_id = int(comment_id_raw)
+            comment_item["comment_id"] = comment_id
+        except Exception:
+            utils.logger.error(f"[WeiboDbStoreImplement.store_comment] invalid comment_id: {comment_id_raw}")
+            return
+        try:
+            note_id = int(note_id_raw) if note_id_raw is not None else None
+            comment_item["note_id"] = note_id
+        except Exception:
+            utils.logger.error(f"[WeiboDbStoreImplement.store_comment] invalid note_id: {note_id_raw}")
+            return
         async with get_session() as session:
             stmt = select(WeiboNoteComment).where(WeiboNoteComment.comment_id == comment_id)
             res = await session.execute(stmt)

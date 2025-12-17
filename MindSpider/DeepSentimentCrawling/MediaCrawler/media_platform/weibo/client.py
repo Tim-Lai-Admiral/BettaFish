@@ -58,7 +58,16 @@ class WeiboClient:
         if enable_return_response:
             return response
 
-        data: Dict = response.json()
+        try:
+            data: Dict = response.json()
+        except Exception:
+            text = response.text
+            utils.logger.error(
+                f"[WeiboClient.request] Non-JSON response. status={response.status_code}, "
+                f"content-type={response.headers.get('content-type')}, "
+                f"body={text[:500]}"
+            )
+            raise DataFetchError(f"Non-JSON response status={response.status_code}")
         ok_code = data.get("ok")
         if ok_code == 0:  # response error
             utils.logger.error(f"[WeiboClient.request] request {method}:{url} err, res:{data}")

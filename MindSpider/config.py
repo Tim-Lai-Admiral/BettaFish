@@ -8,10 +8,9 @@ from typing import Optional
 from pydantic import Field
 from pathlib import Path
 
-# 计算 .env 优先级：优先当前工作目录，其次项目根目录（MindSpider 的上级目录）
+# 固定使用 MindSpider 目录下的 .env（不再受当前工作目录影响）
 PROJECT_ROOT: Path = Path(__file__).resolve().parents[1]
-CWD_ENV: Path = Path.cwd() / ".env"
-ENV_FILE: str = str(CWD_ENV if CWD_ENV.exists() else (PROJECT_ROOT / ".env"))
+ENV_FILE: str = str(Path(__file__).resolve().parent / ".env")
 
 class Settings(BaseSettings):
     """全局配置管理，优先从环境变量和.env加载。支持MySQL/PostgreSQL统一数据库参数命名。"""
